@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+*.prof
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# Misc
+*.tmp
+.temp/
+SPEC-KIT-WORKFLOW.md

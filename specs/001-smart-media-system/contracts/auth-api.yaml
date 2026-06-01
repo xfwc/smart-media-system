@@ -1,0 +1,74 @@
+# Auth API Contract
+# Service: gateway/user
+
+## POST /api/v1/auth/register
+注册新用户账号。
+
+Request:
+```json
+{
+  "username": "string (3-50 chars, alphanumeric+_-. )",
+  "password": "string (8-128 chars)",
+  "email": "string (email format, optional)",
+  "phone": "string (11-digit phone, optional)"
+}
+```
+Note: email 或 phone 至少提供一个。
+
+Response 201:
+```json
+{
+  "id": "int",
+  "username": "string",
+  "token": "string (JWT access token, 24h expiry)",
+  "message": "string"
+}
+```
+
+Errors: 400 (validation), 409 (username/email/phone exists)
+
+---
+
+## POST /api/v1/auth/login
+用户登录。
+
+Request:
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+Response 200:
+```json
+{
+  "id": "int",
+  "username": "string",
+  "token": "string (JWT access token, 24h expiry)",
+  "interests": ["string"]
+}
+```
+
+Errors: 401 (invalid credentials)
+
+---
+
+## GET /api/v1/auth/me
+获取当前登录用户信息（需认证）。
+
+Headers: `Authorization: Bearer <token>`
+
+Response 200:
+```json
+{
+  "id": "int",
+  "username": "string",
+  "email": "string|null",
+  "phone": "string|null",
+  "interests": ["string"],
+  "created_at": "datetime"
+}
+```
+
+Errors: 401 (unauthorized)

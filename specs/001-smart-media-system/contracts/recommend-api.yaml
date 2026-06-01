@@ -1,0 +1,101 @@
+# Recommendation API Contract
+# Service: recommend
+
+## GET /api/v1/recommend
+获取个性化推荐选题列表（需认证）。
+
+Headers: `Authorization: Bearer <token>`
+
+Query Params:
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| page | int | 1 | 页码 |
+| page_size | int | 10 | 每页条数(max 20) |
+| strategy | string | mixed | 推荐策略: content(内容CF) / user(用户CF) / hot(热度) / mixed(混合) |
+
+Response 200:
+```json
+{
+  "total": "int",
+  "page": "int",
+  "page_size": "int",
+  "strategy": "string",
+  "items": [
+    {
+      "id": "int",
+      "topic_id": "int",
+      "topic_title": "string",
+      "topic_category": "string",
+      "topic_rank": "int",
+      "score": "float (0-100)",
+      "reason": "string (推荐理由)",
+      "match_tags": ["string (匹配的兴趣标签)"],
+      "feedback": "string|null (user feedback: liked/disliked/null)"
+    }
+  ]
+}
+```
+
+---
+
+## POST /api/v1/recommend/feedback
+提交推荐反馈（需认证）。
+
+Request:
+```json
+{
+  "recommend_id": "int",
+  "feedback": "string (liked/disliked)"
+}
+```
+
+Response 200:
+```json
+{
+  "message": "string"
+}
+```
+
+Errors: 400, 404
+
+---
+
+## GET /api/v1/recommend/history
+查看推荐历史（需认证）。
+
+Response 200:
+```json
+{
+  "total": "int",
+  "items": [
+    {
+      "id": "int",
+      "topic_title": "string",
+      "score": "float",
+      "feedback": "string|null",
+      "created_at": "datetime"
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/v1/recommend/ab-stats
+获取A/B测试统计数据（需管理员权限）。
+
+Response 200:
+```json
+{
+  "groups": [
+    {
+      "group_name": "string",
+      "strategy": "string",
+      "impressions": "int",
+      "likes": "int",
+      "dislikes": "int",
+      "ctr": "float"
+    }
+  ]
+}
+```

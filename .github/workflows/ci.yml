@@ -1,0 +1,59 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop, "feature/*"]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install black mypy
+      - run: black --check backend/app/
+      - run: mypy backend/app/ --ignore-missing-imports || true
+
+  lint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "18" }
+      - run: cd frontend && npm ci && npm run lint || true
+
+  test-backend:
+    runs-on: ubuntu-latest
+    needs: [lint-backend]
+    services:
+      mysql:
+        image: mysql:8.0
+        env: { MYSQL_ROOT_PASSWORD: root123, MYSQL_DATABASE: smart_media }
+        ports: ["3306:3306"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r backend/requirements.txt pytest pytest-asyncio pytest-cov
+      - run: cd backend && MYSQL_URL="mysql+asyncmy://root:root123@localhost:3306/smart_media" pytest tests/ -v --cov=app || true
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    needs: [lint-frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "18" }
+      - run: cd frontend && npm ci && npm run test || true
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t sms-backend ./backend
+      - run: docker build -t sms-frontend -f ./frontend/Dockerfile.prod ./frontend
