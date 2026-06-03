@@ -47,9 +47,9 @@ async function load() {
       request.get('/admin/ideas/pending'),
       request.get('/admin/stats'),
     ]);
-    if (ideasRes.status === 'fulfilled') pendingIdeas.value = ideasRes.value.data?.items || [];
+    if (ideasRes.status === 'fulfilled') pendingIdeas.value = ideasRes.value.items || [];
     if (statsRes.status === 'fulfilled') {
-      stats.value = statsRes.value.data || {};
+      stats.value = statsRes.value || {};
       statsCards[0].value = stats.value.users_total || 0;
       statsCards[1].value = stats.value.topics_total || 0;
       statsCards[2].value = stats.value.recommendations_total || 0;

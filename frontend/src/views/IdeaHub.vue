@@ -6,11 +6,11 @@
     </div>
     <div class="filters">
       <el-radio-group v-model="category" @change="fetchList" size="small">
-        <el-radio-button label="">全部</el-radio-button>
-        <el-radio-button v-for="cat in categories" :key="cat" :label="cat">{{ cat }}</el-radio-button>
+        <el-radio-button value="">全部</el-radio-button>
+        <el-radio-button v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</el-radio-button>
       </el-radio-group>
       <el-radio-group v-model="sortBy" @change="fetchList" size="small" style="margin-left: auto">
-        <el-radio-button label="hot">热门</el-radio-button><el-radio-button label="new">最新</el-radio-button>
+        <el-radio-button value="hot">热门</el-radio-button><el-radio-button value="new">最新</el-radio-button>
       </el-radio-group>
     </div>
     <div class="card-grid" v-loading="loading">
@@ -43,7 +43,7 @@ async function fetchList() {
   loading.value = true;
   try {
     const res = await request.get('/ideas', { params: { category: category.value || undefined, sort_by: sortBy.value } });
-    items.value = res.data.items || [];
+    items.value = res.items || [];
   } finally { loading.value = false; }
 }
 

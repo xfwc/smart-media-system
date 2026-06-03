@@ -1,12 +1,11 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from app.core.config import settings
-from app.db.session import engine
 from app.db.redis import init_redis, close_redis
 from app.db.mongodb import init_mongodb, close_mongodb
-from app.core.logging import log_request_middleware
+from app.core.logging import setup_logging_middleware
+from app.core.scheduler import start_scheduler, stop_scheduler
 
 
 @asynccontextmanager
@@ -14,11 +13,12 @@ async def lifespan(app: FastAPI):
     # Startup
     await init_redis()
     await init_mongodb()
+    start_scheduler()
     yield
     # Shutdown
+    stop_scheduler()
     await close_redis()
     await close_mongodb()
-    await engine.dispose()
 
 
 app = FastAPI(
@@ -27,7 +27,6 @@ app = FastAPI(
     docs_url="/docs",
     lifespan=lifespan,
 )
-
 
 # CORS
 app.add_middleware(
@@ -38,17 +37,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Request logging middleware
-app.middleware("http")(log_request_middleware)
+# Request logging (only if MongoDB available)
+try:
+    from app.core.logging import log_request_middleware
+    app.middleware("http")(log_request_middleware)
+except Exception:
+    pass
 
 
-# Health check
 @app.get("/health")
 async def health():
     return {"status": "ok", "app": settings.APP_NAME}
 
 
-# Import and include routers (will be added per user story)
+# Routers — import only after app is created
 from app.api.user.auth import router as auth_router
 from app.api.user.profile import router as profile_router
 from app.api.hot.routes import router as hot_router

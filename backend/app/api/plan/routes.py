@@ -2,10 +2,11 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app.db.session import get_db
 from app.core.deps import get_current_user_id
 from app.models.plan import ContentPlan, PlanIntent, PlanOutput, PlanTemplate
-from app.models.hot import HotTopic
+from app.models.hot import HotTopic, TopicAnalysis
 from app.schemas.plan import (
     PlanGenerateRequest, PlanStatusResponse, PlanDetailResponse,
     PlanData, TitleSuggestion, Outline, Advice, TemplateItem,
@@ -21,8 +22,10 @@ async def generate_plan(
     user_id: int = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_db),
 ):
-    # Verify topic exists
-    topic_result = await session.execute(select(HotTopic).where(HotTopic.id == req.topic_id))
+    # Verify topic exists and load analysis eagerly
+    topic_result = await session.execute(
+        select(HotTopic).options(selectinload(HotTopic.analysis)).where(HotTopic.id == req.topic_id)
+    )
     topic = topic_result.scalar_one_or_none()
     if not topic:
         return ApiResponse(code=400, message="热点不存在"), 400
@@ -69,7 +72,7 @@ async def generate_plan(
         shooting_advice=advice.get("shooting"),
         publish_advice=advice.get("publishing"),
         recommended_tags=advice.get("tags"),
-        risk_warning=f"注意：此话题风险等级为{getattr(topic.analysis, 'risk_level', 'low') if hasattr(topic, 'analysis') and topic.analysis else 'low'}，请确保内容客观公正",
+        risk_warning=f"注意：此话题风险等级为{topic.analysis.risk_level.value if topic.analysis else 'low'}，请确保内容客观公正",
     )
     session.add(output)
 

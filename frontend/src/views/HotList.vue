@@ -6,13 +6,13 @@
     </div>
     <div class="filters">
       <el-radio-group v-model="category" @change="fetchList" size="small">
-        <el-radio-button label="">全部</el-radio-button>
-        <el-radio-button v-for="cat in categories" :key="cat" :label="cat">{{ cat }}</el-radio-button>
+        <el-radio-button value="">全部</el-radio-button>
+        <el-radio-button v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</el-radio-button>
       </el-radio-group>
       <el-radio-group v-model="sortBy" @change="fetchList" size="small" style="margin-left: auto">
-        <el-radio-button label="rank">按排名</el-radio-button>
-        <el-radio-button label="heat">按热度</el-radio-button>
-        <el-radio-button label="time">按时间</el-radio-button>
+        <el-radio-button value="rank">按排名</el-radio-button>
+        <el-radio-button value="heat">按热度</el-radio-button>
+        <el-radio-button value="time">按时间</el-radio-button>
       </el-radio-group>
     </div>
     <el-table :data="items" stripe v-loading="loading" @row-click="goDetail" style="cursor: pointer">
@@ -29,6 +29,9 @@
       </el-table-column>
       <el-table-column prop="category" label="分类" width="90">
         <template #default="{ row }"><el-tag size="small">{{ row.category || '-' }}</el-tag></template>
+      </el-table-column>
+      <el-table-column label="日期" width="100">
+        <template #default="{ row }">{{ row.collected_at?.slice(0, 10) || '-' }}</template>
       </el-table-column>
     </el-table>
     <el-pagination v-model:current-page="page" :total="total" :page-size="20" layout="prev, pager, next" @change="fetchList" style="margin-top: 20px; justify-content: center" />
@@ -54,15 +57,15 @@ async function fetchList() {
   loading.value = true;
   try {
     const res = await request.get('/hot/list', { params: { page: page.value, category: category.value || undefined, sort_by: sortBy.value, keyword: keyword.value || undefined } });
-    items.value = res.data.items || [];
-    total.value = res.data.total || 0;
+    items.value = res.items || [];
+    total.value = res.total || 0;
   } finally {
     loading.value = false;
   }
 }
 
 function goDetail(row) { router.push(`/hot/${row.id}`); }
-function formatHeat(val) { return val > 10000 ? (val / 10000).toFixed(1) + '万' : val; }
+function formatHeat(val) { return val > 10000 ? Math.round(val / 10000) + 'w' : val; }
 onMounted(fetchList);
 </script>
 

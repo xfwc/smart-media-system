@@ -5,7 +5,6 @@
         <router-link to="/" class="logo">📊 智能传媒</router-link>
         <el-menu mode="horizontal" :default-active="activeMenu" router>
           <el-menu-item index="/hot">热榜分析</el-menu-item>
-          <el-menu-item index="/recommend">选题推荐</el-menu-item>
           <el-menu-item index="/plan">内容企划</el-menu-item>
           <el-menu-item index="/ideas">点子库</el-menu-item>
           <el-menu-item v-if="isAdmin" index="/admin">管理后台</el-menu-item>
@@ -19,6 +18,7 @@
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
+                  <el-dropdown-item @click="$router.push('/recommend')">选题推荐</el-dropdown-item>
                   <el-dropdown-item @click="$router.push('/profile')">个人中心</el-dropdown-item>
                   <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
                 </el-dropdown-menu>

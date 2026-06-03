@@ -63,7 +63,7 @@ async function handleRegister() {
       password: form.password,
       email: form.email || undefined,
     });
-    authStore.setAuth(res.data.token, { username: res.data.username, role: 'creator' });
+    authStore.setAuth(res.token, { username: res.username, role: 'creator' });
     router.push('/profile');
   } finally {
     loading.value = false;

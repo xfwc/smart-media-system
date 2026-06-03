@@ -39,7 +39,7 @@ const commentText = ref('');
 async function load() {
   try {
     const res = await request.get(`/ideas/${route.params.id}`);
-    idea.value = res.data;
+    idea.value = res;
   } finally { loading.value = false; }
 }
 

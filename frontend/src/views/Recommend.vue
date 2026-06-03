@@ -30,7 +30,7 @@ const loading = ref(true);
 async function load() {
   try {
     const res = await request.get('/recommend');
-    items.value = res.data.items || [];
+    items.value = res.items || [];
   } finally { loading.value = false; }
 }
 

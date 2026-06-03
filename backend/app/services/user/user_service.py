@@ -1,11 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
+from sqlalchemy.orm import selectinload
 from app.models.user import User, UserProfile, UserInterest
 from app.schemas.user import ProfileUpdate, UserProfileResponse
 
 
 async def get_profile(session: AsyncSession, user_id: int) -> UserProfileResponse:
-    result = await session.execute(select(User).where(User.id == user_id))
+    result = await session.execute(
+        select(User).options(selectinload(User.profile)).where(User.id == user_id)
+    )
     user = result.scalar_one_or_none()
     if not user:
         raise ValueError("用户不存在")

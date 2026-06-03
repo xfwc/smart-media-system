@@ -17,7 +17,8 @@ request.interceptors.request.use((config) => {
 request.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const msg = error.response?.data?.detail || error.message || '请求失败';
+    const body = error.response?.data || {};
+    const msg = body.message || body.detail || error.message || '请求失败';
     ElMessage.error(msg);
     if (error.response?.status === 401) {
       localStorage.removeItem('token');

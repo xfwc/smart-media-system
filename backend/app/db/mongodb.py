@@ -7,29 +7,28 @@ mongo_db: AsyncIOMotorDatabase | None = None
 
 async def init_mongodb():
     global mongo_client, mongo_db
-    mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
-    mongo_db = mongo_client.smart_media
-
-    # Ensure collections exist
-    collections = await mongo_db.list_collection_names()
-    for col_name in [
-        settings.MONGO_CRAWL_COLLECTION,
-        settings.MONGO_API_LOGS_COLLECTION,
-        settings.MONGO_AI_LOGS_COLLECTION,
-        settings.MONGO_ARCHIVE_COLLECTION,
-    ]:
-        if col_name not in collections:
-            await mongo_db.create_collection(col_name)
+    try:
+        mongo_client = AsyncIOMotorClient(
+            settings.MONGODB_URL, serverSelectionTimeoutMS=2000,
+        )
+        mongo_db = mongo_client.smart_media
+        await mongo_client.admin.command("ping")
+        print("[MongoDB] Connected")
+    except Exception:
+        print("[MongoDB] Unavailable — running without document logging")
+        mongo_client = None
+        mongo_db = None
 
 
 async def close_mongodb():
     global mongo_client
     if mongo_client:
-        mongo_client.close()
+        try:
+            mongo_client.close()
+        except Exception:
+            pass
         mongo_client = None
 
 
-def get_mongo_db() -> AsyncIOMotorDatabase:
-    if mongo_db is None:
-        raise RuntimeError("MongoDB not initialized. Call init_mongodb() first.")
+def get_mongo_db() -> AsyncIOMotorDatabase | None:
     return mongo_db

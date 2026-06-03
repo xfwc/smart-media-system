@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class ProfileUpdate(BaseModel):
@@ -10,6 +10,18 @@ class ProfileUpdate(BaseModel):
 
 class InterestRequest(BaseModel):
     category: str
+
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("新密码至少8位")
+        return v
 
 
 class UserProfileResponse(BaseModel):

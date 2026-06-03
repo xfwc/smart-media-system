@@ -31,6 +31,7 @@ class HotTopicDetail(BaseModel):
     source: str
     source_url: str | None = None
     summary: str | None = None
+    detail_text: str | None = None
     risk_level: str | None = None
     collected_at: str | None = None
 

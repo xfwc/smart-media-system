@@ -62,5 +62,5 @@ class UserBehaviorLog(Base):
     action_type: Mapped[str] = mapped_column(String(30), nullable=False)
     target_type: Mapped[str | None] = mapped_column(String(30))
     target_id: Mapped[int | None] = mapped_column(Integer)
-    metadata: Mapped[dict | None] = mapped_column(JSON)
+    extra_data: Mapped[dict | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

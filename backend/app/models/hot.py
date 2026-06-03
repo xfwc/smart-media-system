@@ -34,8 +34,9 @@ class HotTopic(Base):
     source: Mapped[str] = mapped_column(String(50), nullable=False)
     source_url: Mapped[str | None] = mapped_column(String(500))
     summary: Mapped[str | None] = mapped_column(Text)
+    detail_text: Mapped[str | None] = mapped_column(Text)
     batch_id: Mapped[str] = mapped_column(String(36), nullable=False)
-    collected_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    collected_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
 
     analysis: Mapped["TopicAnalysis | None"] = relationship(back_populates="topic", uselist=False)
 

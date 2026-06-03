@@ -41,7 +41,7 @@ async function handleLogin() {
   loading.value = true;
   try {
     const res = await request.post('/auth/login', form);
-    authStore.setAuth(res.data.token, { username: res.data.username, role: res.data.role });
+    authStore.setAuth(res.token, { username: res.username, role: res.role });
     router.push('/hot');
   } finally {
     loading.value = false;
