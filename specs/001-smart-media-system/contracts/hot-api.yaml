@@ -1,0 +1,79 @@
+# Hot Topics API Contract
+# Service: hot
+
+## GET /api/v1/hot/list
+获取热榜列表（支持分页、筛选、搜索、排序）。
+
+Query Params:
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| page | int | 1 | 页码 |
+| page_size | int | 20 | 每页条数(max 50) |
+| category | string | - | 分类筛选: 时政/财经/科技/娱乐/体育/美食/教育/其他 |
+| sort_by | string | rank | 排序: rank(排名) / heat(热度) / time(时间) |
+| keyword | string | - | 标题关键词搜索 |
+
+Response 200:
+```json
+{
+  "total": "int",
+  "page": "int",
+  "page_size": "int",
+  "items": [
+    {
+      "id": "int",
+      "title": "string",
+      "rank": "int",
+      "heat_value": "float",
+      "category": "string",
+      "source": "string",
+      "collected_at": "datetime"
+    }
+  ],
+  "updated_at": "datetime (cache snapshot time)"
+}
+```
+
+---
+
+## GET /api/v1/hot/{topic_id}
+获取热点详情。
+
+Response 200:
+```json
+{
+  "id": "int",
+  "title": "string",
+  "rank": "int",
+  "heat_value": "float",
+  "category": "string",
+  "source": "string",
+  "url": "string|null",
+  "summary": "string|null",
+  "risk_level": "string (low/medium/high)",
+  "collected_at": "datetime"
+}
+```
+
+Errors: 404
+
+---
+
+## GET /api/v1/hot/{topic_id}/analysis
+获取热点分析结果。
+
+Response 200:
+```json
+{
+  "topic_id": "int",
+  "keywords": ["string"],
+  "category": "string",
+  "sentiment": "string (positive/negative/neutral)",
+  "sentiment_score": "float (-1.0 to 1.0)",
+  "risk_level": "string (low/medium/high)",
+  "risk_reason": "string",
+  "analyzed_at": "datetime"
+}
+```
+
+Errors: 404 (topic not found or not yet analyzed)

@@ -1,0 +1,112 @@
+# Content Plan API Contract
+# Service: plan
+
+## POST /api/v1/plan/generate
+生成内容企划案（需认证）。
+
+Request:
+```json
+{
+  "topic_id": "int (required)",
+  "intent": {
+    "angle": "string (optional, 创作角度/想表达的观点)",
+    "audience": "string (optional, 目标受众/粉丝画像描述)",
+    "style": "string (optional, 视频风格偏好)"
+  },
+  "template_id": "int|null (optional, 企划模板ID)"
+}
+```
+
+Response 202 (accepted, async processing):
+```json
+{
+  "plan_id": "int",
+  "status": "string (processing)",
+  "message": "企划生成中，请稍候..."
+}
+```
+
+Then poll: GET /api/v1/plan/{plan_id}/status
+
+Response 200 (completed):
+```json
+{
+  "plan_id": "int",
+  "status": "completed",
+  "data": {
+    "title_suggestions": [
+      {"title": "string", "style": "string (吸引力/疑问式/数字式)"},
+      {"title": "string", "style": "string"},
+      {"title": "string", "style": "string"}
+    ],
+    "outline": {
+      "hook": "string (开头吸引点)",
+      "step1": "string (引入问题/悬念)",
+      "step2": "string (展开分析/演示)",
+      "step3": "string (高潮/反转/结论)",
+      "step4": "string (互动引导/总结)"
+    },
+    "advice": {
+      "shooting": "string (拍摄建议)",
+      "publishing": "string (发布时间/频率建议)",
+      "tags": ["string (推荐标签)"]
+    },
+    "risk_warning": "string (风险提示)"
+  },
+  "generated_at": "datetime"
+}
+```
+
+Errors: 400 (invalid topic_id), 429 (rate limit), 503 (AI service unavailable)
+
+---
+
+## GET /api/v1/plan/history
+查看企划历史列表（需认证）。
+
+Query Params:
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| page | int | 1 | 页码 |
+| page_size | int | 10 | 每页条数 |
+
+Response 200:
+```json
+{
+  "total": "int",
+  "items": [
+    {
+      "id": "int",
+      "topic_title": "string",
+      "status": "string",
+      "generated_at": "datetime"
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/v1/plan/{plan_id}
+获取企划详情（需认证）。
+
+Response 200: Same as generate response `data` field.
+
+---
+
+## GET /api/v1/plan/templates
+获取可用的企划模板列表。
+
+Response 200:
+```json
+{
+  "templates": [
+    {
+      "id": "int",
+      "name": "string",
+      "description": "string",
+      "style_tags": ["string"]
+    }
+  ]
+}
+```

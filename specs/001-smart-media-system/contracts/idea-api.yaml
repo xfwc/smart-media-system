@@ -1,0 +1,175 @@
+# Idea Hub API Contract
+# Service: idea
+
+## GET /api/v1/ideas
+获取点子库列表（支持分页、筛选、排序）。
+
+Query Params:
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| page | int | 1 | 页码 |
+| page_size | int | 10 | 每页条数(max 20) |
+| category | string | - | 分类筛选 |
+| sort_by | string | hot | 排序: hot(热度) / new(最新) |
+| keyword | string | - | 标题/内容搜索 |
+
+Response 200:
+```json
+{
+  "total": "int",
+  "items": [
+    {
+      "id": "int",
+      "title": "string",
+      "content_preview": "string (前200字)",
+      "category": "string",
+      "related_topic_title": "string|null",
+      "author_name": "string (或 '匿名用户')",
+      "likes_count": "int",
+      "comments_count": "int",
+      "created_at": "datetime"
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/v1/ideas/{idea_id}
+获取点子详情。
+
+Response 200:
+```json
+{
+  "id": "int",
+  "title": "string",
+  "content": "string",
+  "category": "string",
+  "tags": ["string"],
+  "related_topic_id": "int|null",
+  "related_topic_title": "string|null",
+  "author": {
+    "id": "int",
+    "username": "string (or Anonymous user)"
+  },
+  "likes_count": "int",
+  "liked_by_me": "bool",
+  "comments": [
+    {
+      "id": "int",
+      "content": "string",
+      "author_name": "string",
+      "created_at": "datetime",
+      "replies": [
+        {
+          "id": "int",
+          "content": "string",
+          "author_name": "string",
+          "created_at": "datetime"
+        }
+      ]
+    }
+  ],
+  "status": "string (pending/approved/rejected)",
+  "created_at": "datetime"
+}
+```
+
+---
+
+## POST /api/v1/ideas
+发布新点子（需认证）。
+
+Request:
+```json
+{
+  "title": "string (1-100 chars)",
+  "content": "string (1-5000 chars)",
+  "category": "string",
+  "tags": ["string (optional)"],
+  "related_topic_id": "int|null",
+  "is_anonymous": "bool (default false)"
+}
+```
+
+Response 201:
+```json
+{
+  "id": "int",
+  "status": "pending (awaiting review)",
+  "message": "点子已提交，审核通过后展示"
+}
+```
+
+Errors: 400 (validation)
+
+---
+
+## POST /api/v1/ideas/{idea_id}/like
+点赞/取消点赞（需认证）。
+
+Response 200:
+```json
+{
+  "liked": "bool",
+  "likes_count": "int"
+}
+```
+
+---
+
+## POST /api/v1/ideas/{idea_id}/comments
+发表评论（需认证）。
+
+Request:
+```json
+{
+  "content": "string (1-500 chars)",
+  "parent_id": "int|null (回复某条评论时传入)"
+}
+```
+
+Response 201:
+```json
+{
+  "id": "int",
+  "content": "string",
+  "created_at": "datetime"
+}
+```
+
+---
+
+## Admin APIs (需管理员权限)
+
+### GET /api/v1/admin/ideas/pending
+获取待审核点子列表。
+
+### POST /api/v1/admin/ideas/{idea_id}/review
+审核点子。
+
+Request:
+```json
+{
+  "action": "string (approve/reject)",
+  "reason": "string (rejection reason, required if reject)"
+}
+```
+
+### GET /api/v1/admin/stats
+获取系统运营统计数据。
+
+Response 200:
+```json
+{
+  "users_total": "int",
+  "topics_total": "int",
+  "recommendations_total": "int",
+  "plans_total": "int",
+  "ideas_total": "int",
+  "daily_active_users": "int",
+  "stats_by_date": [
+    {"date": "string", "new_users": "int", "new_ideas": "int"}
+  ]
+}
+```
